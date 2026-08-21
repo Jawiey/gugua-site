@@ -1,140 +1,256 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>jawiey 刚发的群聊记录…</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Age Verification</title>
 
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-       background:#0a0a0a;height:100vh;overflow:hidden;color:#fff;
-       display:flex;flex-direction:column;align-items:center;
-       justify-content:center;user-select:none}
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  .cover{text-align:center;padding:20px;cursor:pointer;animation:fadeIn 1s ease-out}
-  .cover .thumb{position:relative;width:min(90vw,420px);aspect-ratio:9/16;
-    background:linear-gradient(135deg,#1a0000,#8b0000,#ff1744);
-    border-radius:16px;margin:0 auto 20px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    box-shadow:0 10px 40px #ff174455;overflow:hidden}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
 
-  .cover .badge{position:absolute;top:12px;left:12px;
-    font-size:11px;background:#0008;padding:4px 8px;
-    border-radius:10px;color:#ff5252;animation:blink 1s infinite}
+    /* 年龄验证封面 */
+    #age-cover {
+      position: fixed;
+      inset: 0;
+      background: url('bg.jpg') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      z-index: 1000;
+    }
 
-  .cover .play-btn{width:70px;height:70px;background:#fff;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:30px;color:#d32f2f;
-    box-shadow:0 4px 20px #0008;animation:pulse 1.5s infinite}
+    /* 半透明遮罩 + 轻微模糊，让文字更清晰 */
+    #age-cover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(4px);
+      z-index: -1;
+    }
 
-  .cover .thumb p{margin-top:16px;font-size:14px;color:#ffcdd2}
+    #age-cover h1 {
+      font-size: 28px;
+      color: #000;
+      margin-bottom: 12px;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    }
 
-  .cover h1{font-size:22px;margin-bottom:10px;color:#ff5252;
-    text-shadow:0 0 15px #ff525255}
+    #age-cover .sub-zh {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
 
-  .cover .sub{font-size:14px;color:#ff8a80;margin-bottom:8px}
+    #age-cover .sub-en {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.5;
+      max-width: 400px;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
 
-  .cover .warn{font-size:12px;color:#ff8a80;max-width:320px;
-    line-height:1.6;opacity:.85}
+    .btn-group {
+      display: flex;
+      gap: 15px;
+    }
 
-  @keyframes blink{0%,100%{opacity:.6}50%{opacity:1}}
-  @keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 20px #0008}
-                   50%{transform:scale(1.12);box-shadow:0 0 30px #fff8}}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}
-                   to{opacity:1;transform:translateY(0)}}
+    button {
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.1s, opacity 0.2s;
+      font-weight: bold;
+    }
 
-  .player{display:none;position:fixed;inset:0;background:#000;
-         z-index:9999;flex-direction:column;align-items:center;
-         justify-content:center}
-  .player video{width:100%;height:100%;object-fit:contain;background:#000}
-  .player .credit{position:absolute;bottom:20px;left:0;width:100%;
-         text-align:center;color:#fff8;font-size:14px;
-         text-shadow:0 1px 4px #000;animation:blink 2s infinite}
-  .player .credit b{color:#e91e63}
+    button:active {
+      transform: scale(0.96);
+    }
 
-  .reveal{display:none;position:fixed;inset:0;background:#0a0a0a;
-         z-index:10000;flex-direction:column;align-items:center;
-         justify-content:center;text-align:center;padding:30px;
-         animation:fadeIn .8s}
-  .reveal h1{font-size:38px;color:#ffeb3b;margin-bottom:16px;
-         text-shadow:0 0 30px #ffeb3b55}
-  .reveal p{font-size:18px;color:#fff;line-height:2}
-  .reveal .emoji{font-size:60px;margin-bottom:16px;animation:bounce 1s infinite}
-  @keyframes bounce{0%,100%{transform:translateY(0)}
-                   50%{transform:translateY(-12px)}}
-</style>
+    #btn-over {
+      background-color: #ff0000;
+      color: #fff;
+      border: 2px solid #cc0000;
+    }
+
+    #btn-under {
+      background-color: #ffffffcc;
+      color: #000;
+      border: 2px solid #000;
+      backdrop-filter: blur(2px);
+    }
+
+    /* 播放器 */
+    .player {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 1001;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .player video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .credit {
+      position: absolute;
+      bottom: 20px;
+      color: #fff;
+      font-size: 14px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 16px;
+      border-radius: 20px;
+    }
+
+    .credit b {
+      color: #e91e63;
+    }
+
+    /* 结束揭晓 */
+    .reveal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0a0a0a;
+      z-index: 10002;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      animation: fadeIn .8s;
+    }
+
+    .reveal h1 {
+      font-size: 38px;
+      color: #ffeb3b;
+      margin-bottom: 16px;
+      text-shadow: 0 0 30px #ffeb3b55;
+    }
+
+    .reveal p {
+      font-size: 18px;
+      color: #fff;
+      line-height: 2;
+    }
+
+    .reveal .emoji {
+      font-size: 60px;
+      margin-bottom: 16px;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- ✅ 新封面（高诱惑、与视频无关） -->
-<div class="cover" id="cover" onclick="start()">
-  <div class="thumb">
-    <div class="badge">🔒 仅你可见</div>
-    <div class="play-btn">👀</div>
-    <p>群聊记录 · 已撤回</p>
+  <!-- 年龄验证界面 -->
+  <div id="age-cover">
+    <h1>您是否已满18岁</h1>
+    <p class="sub-zh">以下内容可能不适合未满18岁的人群观看，<br>我们需要确认您的年龄。</p>
+    <p class="sub-en">The following may not be suitable for people under the age of 18 and we need to confirm your age.</p>
+    <div class="btn-group">
+      <button id="btn-over" onclick="start()">已满18岁</button>
+      <button id="btn-under" onclick="under18()">未满18岁</button>
+    </div>
   </div>
 
-  <h1>jawiey 刚发的群聊记录…</h1>
-  <div class="sub">⚠️ 点开前请确认身边没人</div>
-  <div class="warn">此内容已被 3 人举报，继续查看视为自愿承担后果</div>
-</div>
+  <!-- 播放器 -->
+  <div class="player" id="player">
+    <video id="vid" playsinline webkit-playsinline preload="auto">
+      <source src="Video(1).mp4" type="video/mp4">
+      你的浏览器不支持视频播放。
+    </video>
+    <div class="credit">🎵 正在为你播放 <b>Never Gonna Give You Up</b> · jawiey 出品 😈</div>
+  </div>
 
-<!-- 播放器 -->
-<div class="player" id="player">
-  <video id="vid" playsinline webkit-playsinline preload="auto">
-    <source src="Video(1).mp4" type="video/mp4">
-    你的浏览器不支持视频播放。
-  </video>
-  <div class="credit">🎵 正在为你播放 <b>Never Gonna Give You Up</b> · jawiey 出品 😈</div>
-</div>
+  <!-- 结束揭晓 -->
+  <div class="reveal" id="reveal">
+    <div class="emoji">🎉</div>
+    <h1>你被 jawiey Rickroll 了！</h1>
+    <p>
+      经典永不过时 🎵<br>
+      Never gonna give you up~<br>
+      Never gonna let you down~<br><br>
+      下次还敢点 jawiey 的链接吗？😈<br>
+      —— jawiey
+    </p>
+  </div>
 
-<!-- 结束揭晓 -->
-<div class="reveal" id="reveal">
-  <div class="emoji">🎉</div>
-  <h1>你被 jawiey Rickroll 了！</h1>
-  <p>
-    经典永不过时 🎵<br>
-    Never gonna give you up~<br>
-    Never gonna let you down~<br><br>
-    下次还敢点 jawiey 的链接吗？😈<br>
-    —— jawiey
-  </p>
-</div>
+  <script>
+    function start() {
+      const cover = document.getElementById('age-cover');
+      const player = document.getElementById('player');
+      const vid = document.getElementById('vid');
 
-<script>
-function start(){
-  const cover=document.getElementById('cover');
-  const player=document.getElementById('player');
-  const vid=document.getElementById('vid');
+      cover.style.display = 'none';
+      player.style.display = 'flex';
 
-  cover.style.display='none';
-  player.style.display='flex';
+      const docEl = document.documentElement;
+      const reqFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen
+                  || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+      if (reqFs) {
+        try { reqFs.call(docEl); } catch (e) {}
+      }
 
-  const docEl=document.documentElement;
-  const reqFs=docEl.requestFullscreen||docEl.webkitRequestFullscreen
-            ||docEl.mozRequestFullScreen||docEl.msRequestFullscreen;
-  if(reqFs){try{reqFs.call(docEl);}catch(e){}}
+      vid.muted = false;
+      const p = vid.play();
+      if (p && p.catch) {
+        p.catch(() => {
+          vid.muted = true;
+          vid.play();
+        });
+      }
+    }
 
-  vid.muted=false;
-  const p=vid.play();
-  if(p&&p.catch){p.catch(()=>{vid.muted=true;vid.play();});}
-}
+    function under18() {
+      alert("抱歉，您未满18岁无法观看此内容。\n\n开玩笑的，点确定继续吧 😈");
+      start();
+    }
 
-document.getElementById('vid').addEventListener('ended',()=>{
-  document.getElementById('player').style.display='none';
-  document.getElementById('reveal').style.display='flex';
-});
+    document.getElementById('vid').addEventListener('ended', () => {
+      document.getElementById('player').style.display = 'none';
+      document.getElementById('reveal').style.display = 'flex';
+    });
 
-window.addEventListener('beforeunload',e=>{
-  const player=document.getElementById('player');
-  if(player.style.display==='flex'){
-    e.preventDefault();
-    e.returnValue='';
-  }
-});
-</script>
+    window.addEventListener('beforeunload', e => {
+      const player = document.getElementById('player');
+      if (player.style.display === 'flex') {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  </script>
 
 </body>
 </html>

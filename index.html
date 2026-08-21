@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>jawiey 给你发了一段私密视频 💗</title>
+<title>jawiey 刚发的群聊记录…</title>
 
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -12,25 +12,33 @@
        display:flex;flex-direction:column;align-items:center;
        justify-content:center;user-select:none}
 
-  .cover{text-align:center;padding:20px;cursor:pointer;
-         animation:fadeIn 1s ease-out}
+  .cover{text-align:center;padding:20px;cursor:pointer;animation:fadeIn 1s ease-out}
   .cover .thumb{position:relative;width:min(90vw,420px);aspect-ratio:9/16;
-         background:linear-gradient(135deg,#1a1a2e,#e91e63,#ff5722);
-         border-radius:16px;margin:0 auto 20px;
-         display:flex;flex-direction:column;align-items:center;
-         justify-content:center;box-shadow:0 10px 40px #e91e6366;
-         overflow:hidden}
-  .cover .thumb::before{content:"🔒 私密 · 仅 jawiey 可见";
-         position:absolute;top:12px;left:12px;font-size:11px;
-         background:#0008;padding:4px 8px;border-radius:10px;color:#ffeb3b}
+    background:linear-gradient(135deg,#1a0000,#8b0000,#ff1744);
+    border-radius:16px;margin:0 auto 20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:0 10px 40px #ff174455;overflow:hidden}
+
+  .cover .badge{position:absolute;top:12px;left:12px;
+    font-size:11px;background:#0008;padding:4px 8px;
+    border-radius:10px;color:#ff5252;animation:blink 1s infinite}
+
   .cover .play-btn{width:70px;height:70px;background:#fff;border-radius:50%;
-         display:flex;align-items:center;justify-content:center;
-         font-size:30px;color:#e91e63;box-shadow:0 4px 20px #0008;
-         animation:pulse 1.5s infinite}
-  .cover .thumb p{margin-top:16px;font-size:14px;color:#fff8}
-  .cover h1{font-size:24px;margin-bottom:8px;color:#ffeb3b;
-         text-shadow:0 0 15px #ffeb3b55}
-  .cover .sub{font-size:14px;color:#aaa;margin-top:6px}
+    display:flex;align-items:center;justify-content:center;
+    font-size:30px;color:#d32f2f;
+    box-shadow:0 4px 20px #0008;animation:pulse 1.5s infinite}
+
+  .cover .thumb p{margin-top:16px;font-size:14px;color:#ffcdd2}
+
+  .cover h1{font-size:22px;margin-bottom:10px;color:#ff5252;
+    text-shadow:0 0 15px #ff525255}
+
+  .cover .sub{font-size:14px;color:#ff8a80;margin-bottom:8px}
+
+  .cover .warn{font-size:12px;color:#ff8a80;max-width:320px;
+    line-height:1.6;opacity:.85}
+
+  @keyframes blink{0%,100%{opacity:.6}50%{opacity:1}}
   @keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 20px #0008}
                    50%{transform:scale(1.12);box-shadow:0 0 30px #fff8}}
   @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}
@@ -44,7 +52,6 @@
          text-align:center;color:#fff8;font-size:14px;
          text-shadow:0 1px 4px #000;animation:blink 2s infinite}
   .player .credit b{color:#e91e63}
-  @keyframes blink{0%,100%{opacity:.7}50%{opacity:1}}
 
   .reveal{display:none;position:fixed;inset:0;background:#0a0a0a;
          z-index:10000;flex-direction:column;align-items:center;
@@ -61,14 +68,17 @@
 
 <body>
 
-<!-- 诱骗封面 -->
+<!-- ✅ 新封面（高诱惑、与视频无关） -->
 <div class="cover" id="cover" onclick="start()">
   <div class="thumb">
-    <div class="play-btn">▶</div>
-    <p>点击播放</p>
+    <div class="badge">🔒 仅你可见</div>
+    <div class="play-btn">👀</div>
+    <p>群聊记录 · 已撤回</p>
   </div>
-  <h1>💗 jawiey 发来一段私密视频</h1>
-  <div class="sub">仅你可见 · 长按/点击即可观看</div>
+
+  <h1>jawiey 刚发的群聊记录…</h1>
+  <div class="sub">⚠️ 点开前请确认身边没人</div>
+  <div class="warn">此内容已被 3 人举报，继续查看视为自愿承担后果</div>
 </div>
 
 <!-- 播放器 -->
@@ -102,25 +112,21 @@ function start(){
   cover.style.display='none';
   player.style.display='flex';
 
-  // 尝试全屏（合法 API）
   const docEl=document.documentElement;
   const reqFs=docEl.requestFullscreen||docEl.webkitRequestFullscreen
             ||docEl.mozRequestFullScreen||docEl.msRequestFullscreen;
   if(reqFs){try{reqFs.call(docEl);}catch(e){}}
 
-  // 播放（解决浏览器自动播放限制）
   vid.muted=false;
   const p=vid.play();
   if(p&&p.catch){p.catch(()=>{vid.muted=true;vid.play();});}
 }
 
-// 视频结束 → 揭晓页
 document.getElementById('vid').addEventListener('ended',()=>{
   document.getElementById('player').style.display='none';
   document.getElementById('reveal').style.display='flex';
 });
 
-// 合法挽留（点 × / 刷新）
 window.addEventListener('beforeunload',e=>{
   const player=document.getElementById('player');
   if(player.style.display==='flex'){

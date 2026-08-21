@@ -3,457 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>jawieyの表白网站</title>
+<title>jawiey 给你发了一段私密视频 💗</title>
+
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-       background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
-       height:100vh;overflow:hidden;user-select:none;
-       cursor:crosshair}
+       background:#0a0a0a;height:100vh;overflow:hidden;color:#fff;
+       display:flex;flex-direction:column;align-items:center;
+       justify-content:center;user-select:none}
 
-  /* 表白页 */
-  .main{display:flex;flex-direction:column;align-items:center;justify-content:center;
-        height:100vh;color:#fff;text-align:center;padding:20px;
-        position:relative;z-index:1}
-  .main h1{font-size:46px;margin-bottom:20px;
-            text-shadow:0 0 30px #e91e63,0 0 60px #e91e63;
-            animation:glow 2s infinite alternate}
-  .main p{font-size:20px;margin-bottom:30px;color:#fffde7}
-  .love-btn{background:linear-gradient(135deg,#e91e63,#ff5722);
-            color:#fff;border:none;padding:18px 50px;
-            font-size:22px;border-radius:50px;cursor:pointer;
-            animation:pulse 1.5s infinite;font-weight:bold;
-            box-shadow:0 6px 30px #e91e63aa}
-  .love-btn:hover{transform:scale(1.08)}
-  @keyframes pulse{0%,100%{box-shadow:0 6px 30px #e91e63aa}
-                   50%{box-shadow:0 6px 60px #ff5722cc}}
-  @keyframes glow{from{text-shadow:0 0 20px #e91e63}
-                   to{text-shadow:0 0 50px #ff5722,0 0 80px #e91e63}}
+  .cover{text-align:center;padding:20px;cursor:pointer;
+         animation:fadeIn 1s ease-out}
+  .cover .thumb{position:relative;width:min(90vw,420px);aspect-ratio:9/16;
+         background:linear-gradient(135deg,#1a1a2e,#e91e63,#ff5722);
+         border-radius:16px;margin:0 auto 20px;
+         display:flex;flex-direction:column;align-items:center;
+         justify-content:center;box-shadow:0 10px 40px #e91e6366;
+         overflow:hidden}
+  .cover .thumb::before{content:"🔒 私密 · 仅 jawiey 可见";
+         position:absolute;top:12px;left:12px;font-size:11px;
+         background:#0008;padding:4px 8px;border-radius:10px;color:#ffeb3b}
+  .cover .play-btn{width:70px;height:70px;background:#fff;border-radius:50%;
+         display:flex;align-items:center;justify-content:center;
+         font-size:30px;color:#e91e63;box-shadow:0 4px 20px #0008;
+         animation:pulse 1.5s infinite}
+  .cover .thumb p{margin-top:16px;font-size:14px;color:#fff8}
+  .cover h1{font-size:24px;margin-bottom:8px;color:#ffeb3b;
+         text-shadow:0 0 15px #ffeb3b55}
+  .cover .sub{font-size:14px;color:#aaa;margin-top:6px}
+  @keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 20px #0008}
+                   50%{transform:scale(1.12);box-shadow:0 0 30px #fff8}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}
+                   to{opacity:1;transform:translateY(0)}}
 
-  /* 蓝屏 */
-  .bsod{display:none;position:fixed;inset:0;background:#0b66c3;color:#fff;
-        font-family:"Segoe UI",sans-serif;padding:50px 30px;z-index:8888;
-        animation:flicker 5s infinite}
-  .bsod .sad{font-size:100px;margin-bottom:20px;animation:heartbeat 1s infinite}
-  .bsod h2{font-size:24px;font-weight:400;margin-bottom:15px;line-height:1.4}
-  .bsod .info{font-size:16px;line-height:1.8;margin-top:20px}
-  .bsod .highlight{color:#ffe600}
-  .bsod .warning-msg{margin-top:30px;font-size:18px;color:#ffcdd2;
-                     animation:blink 0.8s infinite}
-  @keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-  @keyframes flicker{0%,93%,100%{opacity:1}94%{opacity:.85}95%{opacity:1}
-                     96%{opacity:.9}97%{opacity:1}}
+  .player{display:none;position:fixed;inset:0;background:#000;
+         z-index:9999;flex-direction:column;align-items:center;
+         justify-content:center}
+  .player video{width:100%;height:100%;object-fit:contain;background:#000}
+  .player .credit{position:absolute;bottom:20px;left:0;width:100%;
+         text-align:center;color:#fff8;font-size:14px;
+         text-shadow:0 1px 4px #000;animation:blink 2s infinite}
+  .player .credit b{color:#e91e63}
+  @keyframes blink{0%,100%{opacity:.7}50%{opacity:1}}
 
-  /* 弹窗 */
-  .popup{position:fixed;background:#fff;border:2px solid #e91e63;
-         box-shadow:0 0 20px #e91e6355;z-index:9999;
-         min-width:220px;max-width:320px;
-         animation:popIn .15s ease-out;transition:all .3s ease-out}
-  .popup .title{background:linear-gradient(90deg,#e91e63,#ff5722);
-                 color:#fff;padding:6px 10px;font-size:13px;
-                 font-weight:bold;display:flex;justify-content:space-between}
-  .popup .body{padding:12px 15px;font-size:14px;color:#333;line-height:1.5}
-  .popup .btns{text-align:right;padding:8px 15px;border-top:1px solid #eee}
-  .popup button{background:#e91e63;color:#fff;border:none;
-                padding:5px 20px;font-size:13px;border-radius:3px;
-                cursor:pointer}
-  .popup button:hover{background:#ff4081}
-  @keyframes popIn{from{transform:scale(.5) rotate(-5deg);opacity:0}
-                   to{transform:scale(1) rotate(0);opacity:1}}
-
-  /* 骂人页 */
-  .rage{display:none;position:fixed;inset:0;background:#000;color:#ff1744;
-        z-index:99999;flex-direction:column;justify-content:center;
-        align-items:center;text-align:center;padding:30px;
-        animation:shake .12s infinite}
-  .rage h1{font-size:48px;margin-bottom:25px;text-shadow:0 0 40px #ff1744,
-            0 0 80px #ff1744}
-  .rage p{font-size:22px;line-height:2;color:#ff6666}
-  .rage .sub{font-size:16px;color:#ff9999;margin-top:20px;opacity:.7}
-  @keyframes shake{
-    0%{transform:translate(2px,1px)}
-    20%{transform:translate(-2px,-1px)}
-    40%{transform:translate(-1px,2px)}
-    60%{transform:translate(2px,-2px)}
-    80%{transform:translate(-1px,1px)}
-    100%{transform:translate(1px,-1px)}
-  }
-
-  /* 追踪弹窗（追鼠标） */
-  .hunter{position:fixed;background:linear-gradient(135deg,#ff1744,#e91e63);
-          color:#fff;border:3px solid #fff;z-index:99999;
-          padding:15px 25px;font-size:16px;font-weight:bold;
-          border-radius:10px;pointer-events:none;
-          box-shadow:0 0 30px #ff1744,0 0 60px #e91e63;
-          animation:hunterPulse 0.5s infinite alternate;
-          display:none}
-  @keyframes hunterPulse{from{transform:scale(1) rotate(-2deg)}
-                         to{transform:scale(1.1) rotate(2deg)}}
-
-  /* 假关闭按钮 */
-  .fake-close{position:fixed;top:5px;right:5px;z-index:100000;
-              background:#333;color:#fff;border:1px solid #666;
-              padding:4px 12px;font-size:12px;cursor:pointer;
-              border-radius:3px;animation:fakeGlow 1s infinite alternate}
-  @keyframes fakeGlow{from{box-shadow:0 0 5px #ff0}to{box-shadow:0 0 20px #ff0}}
+  .reveal{display:none;position:fixed;inset:0;background:#0a0a0a;
+         z-index:10000;flex-direction:column;align-items:center;
+         justify-content:center;text-align:center;padding:30px;
+         animation:fadeIn .8s}
+  .reveal h1{font-size:38px;color:#ffeb3b;margin-bottom:16px;
+         text-shadow:0 0 30px #ffeb3b55}
+  .reveal p{font-size:18px;color:#fff;line-height:2}
+  .reveal .emoji{font-size:60px;margin-bottom:16px;animation:bounce 1s infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}
+                   50%{transform:translateY(-12px)}}
 </style>
 </head>
+
 <body>
 
-<!-- 假关闭按钮（误导） -->
-<button class="fake-close" onclick="trapFakeClose()">✕ 关闭</button>
-
-<!-- 追踪弹窗（追鼠标） -->
-<div class="hunter" id="hunter">🎯 你跑不掉了！</div>
-
-<!-- 表白页 -->
-<div class="main" id="main">
-  <h1>💗 jawiey 的表白 💗</h1>
-  <p>其实我憋了很久…<br>你愿意做我的人吗？</p>
-  <button class="love-btn" onclick="activate()">
-    ❤️ 点这里接受表白 ❤️
-  </button>
-  <p style="margin-top:40px;font-size:14px;color:#fff9c4">
-    （温馨提示：点了就别想跑）
-  </p>
+<!-- 诱骗封面 -->
+<div class="cover" id="cover" onclick="start()">
+  <div class="thumb">
+    <div class="play-btn">▶</div>
+    <p>点击播放</p>
+  </div>
+  <h1>💗 jawiey 发来一段私密视频</h1>
+  <div class="sub">仅你可见 · 长按/点击即可观看</div>
 </div>
 
-<!-- 蓝屏 -->
-<div class="bsod" id="bsod">
-  <div class="sad">💔</div>
-  <h2>你的心遇到问题，需要重新爱上 jawiey。</h2>
-  <h2>我们正在收集你的后悔情绪…</h2>
-  <div class="info">
-    <span class="highlight">100%</span> 完成<br><br>
-    错误类型：<span class="highlight">HEART_PROCESS_DIED</span><br>
-    支持代码：<span class="highlight">JAWIEY-LOVE-666</span><br><br>
-    如果你现在关闭网页，<br>
-    系统将判定你 <b>"不爱 jawiey"</b>。<br><br>
-    关闭按钮已被弹窗淹没。<br>
-    鼠标已被锁定追踪。<br>
-    键盘已被永久禁用。
-  </div>
-  <div class="warning-msg" id="warningMsg" style="display:none">
-    ⚠️ 系统已锁定，你跑不掉了。
-  </div>
+<!-- 播放器 -->
+<div class="player" id="player">
+  <video id="vid" playsinline webkit-playsinline preload="auto">
+    <source src="Video(1).mp4" type="video/mp4">
+    你的浏览器不支持视频播放。
+  </video>
+  <div class="credit">🎵 正在为你播放 <b>Never Gonna Give You Up</b> · jawiey 出品 😈</div>
 </div>
 
-<!-- 骂人页 -->
-<div class="rage" id="rage">
-  <h1>💢 关不掉吧？💢</h1>
+<!-- 结束揭晓 -->
+<div class="reveal" id="reveal">
+  <div class="emoji">🎉</div>
+  <h1>你被 jawiey Rickroll 了！</h1>
   <p>
-    弹窗海 + 追杀弹窗 + 阻塞线程<br><br>
-    三管齐下，你还能怎么跑？<br><br>
-    负心的人，连网页都关不干净。<br><br>
-    jawiey 记住你了。<br><br>
-    😈 乖乖承认错误吧。
+    经典永不过时 🎵<br>
+    Never gonna give you up~<br>
+    Never gonna let you down~<br><br>
+    下次还敢点 jawiey 的链接吗？😈<br>
+    —— jawiey
   </p>
-  <div class="sub">（此页面通过 while(true) 阻塞，浏览器已无响应）</div>
 </div>
 
 <script>
-/* ===== 全局状态 ===== */
-const messages = [
-  "⚠️ 系统检测到你想逃跑",
-  "💔 jawiey 很伤心",
-  "😈 你跑不掉了",
-  "📢 关闭按钮已被淹没",
-  "💗 承认错误就能解脱",
-  "🔒 系统已锁定",
-  "⚡ 不听劝是吧？",
-  "📳 手机在震对吧？",
-  "🖥️ 电脑也卡了吧？",
-  "💀 这就是代价",
-  "📌 你每关一个，我弹两个",
-  "🫠 累了吗？承认吧",
-  "📡 已上报 jawiey",
-  "🚫 此网页不允许关闭",
-  "💢 负心的人没有好下场",
-  "📵 请勿试图离开",
-  "🦇 暗影弹窗已部署",
-  "🕳️ 你越挣扎陷越深",
-  "🪤 你中了 jawiey 的陷阱",
-  "🫶 爱 jawiey 是唯一出路",
-  "🎯 你以为点×有用？",
-  "🪞 镜子里的你也在逃跑",
-  "📮 已向 jawiey 发送绝交信",
-  "🔥 你的逃跑值已爆表",
-  "🫀 心都碎了还跑？"
-];
+function start(){
+  const cover=document.getElementById('cover');
+  const player=document.getElementById('player');
+  const vid=document.getElementById('vid');
 
-const hunterTexts = [
-  "🎯 你跑不掉了！",
-  "🫵 抓到你了！",
-  "😈 别躲了！",
-  "💢 还想跑？",
-  "🦅 我盯着你呢！",
-  "🕷️ 网已经织好了！"
-];
+  cover.style.display='none';
+  player.style.display='flex';
 
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx;
-let humSource = null;
-let isRaging = false;
-let hunterActive = false;
+  // 尝试全屏（合法 API）
+  const docEl=document.documentElement;
+  const reqFs=docEl.requestFullscreen||docEl.webkitRequestFullscreen
+            ||docEl.mozRequestFullScreen||docEl.msRequestFullscreen;
+  if(reqFs){try{reqFs.call(docEl);}catch(e){}}
 
-/* ===== 音频 ===== */
-function initAudio(){
-  if(!audioCtx) audioCtx = new AudioCtx();
-  if(audioCtx.state==='suspended') audioCtx.resume();
+  // 播放（解决浏览器自动播放限制）
+  vid.muted=false;
+  const p=vid.play();
+  if(p&&p.catch){p.catch(()=>{vid.muted=true;vid.play();});}
 }
 
-function playHum(){
-  if(!audioCtx||humSource) return;
-  const osc=audioCtx.createOscillator();
-  const gain=audioCtx.createGain();
-  osc.type='sawtooth';
-  osc.frequency.value=55;
-  gain.gain.value=0.06;
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  humSource=osc;
-}
+// 视频结束 → 揭晓页
+document.getElementById('vid').addEventListener('ended',()=>{
+  document.getElementById('player').style.display='none';
+  document.getElementById('reveal').style.display='flex';
+});
 
-function playZap(){
-  if(!audioCtx) return;
-  const osc=audioCtx.createOscillator();
-  const gain=audioCtx.createGain();
-  osc.type='square';
-  osc.frequency.setValueAtTime(300,audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(30,audioCtx.currentTime+0.4);
-  gain.gain.setValueAtTime(0.5,audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.5);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime+0.5);
-}
-
-function playLoop(){
-  if(!audioCtx) return;
-  // 持续电流循环
-  setInterval(()=>{
-    if(isRaging){
-      const osc=audioCtx.createOscillator();
-      const gain=audioCtx.createGain();
-      osc.type='sawtooth';
-      osc.frequency.value=80+Math.random()*40;
-      gain.gain.value=0.03;
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime+0.2);
-    }
-  },150);
-}
-
-/* ===== 震动 ===== */
-function vibrate(p){
-  if(navigator.vibrate) navigator.vibrate(p);
-}
-
-/* ===== 弹窗系统 ===== */
-function createPopup(text,x,y){
-  const popup=document.createElement('div');
-  popup.className='popup';
-  popup.style.left=Math.max(0,Math.min(x,window.innerWidth-250))+'px';
-  popup.style.top=Math.max(0,Math.min(y,window.innerHeight-120))+'px';
-  popup.innerHTML=`
-    <div class="title"><span>⚠️ jawiey 的系统</span><span>🔒</span></div>
-    <div class="body">${text}</div>
-    <div class="btns"><button onclick="onPopupClick(event)">确定</button></div>
-  `;
-  document.body.appendChild(popup);
-  return popup;
-}
-
-function onPopupClick(e){
-  e.stopPropagation();
-  const popup=e.target.closest('.popup');
-  if(popup) popup.remove();
-  // 关1个弹2个
-  for(let i=0;i<2;i++){
-    const x=Math.random()*(window.innerWidth-200);
-    const y=Math.random()*(window.innerHeight-120);
-    const msg=messages[Math.floor(Math.random()*messages.length)];
-    createPopup(msg,x,y);
-  }
-  playZap();
-  vibrate([80,40,80]);
-}
-
-function spamPopups(){
-  // 初始 25 个
-  for(let i=0;i<25;i++){
-    const x=Math.random()*window.innerWidth;
-    const y=Math.random()*window.innerHeight;
-    const msg=messages[Math.floor(Math.random()*messages.length)];
-    createPopup(msg,x,y);
-  }
-  // 持续补充
-  setInterval(()=>{
-    for(let i=0;i<8;i++){
-      const x=Math.random()*window.innerWidth;
-      const y=Math.random()*window.innerHeight;
-      const msg=messages[Math.floor(Math.random()*messages.length)];
-      createPopup(msg,x,y);
-    }
-  },600);
-}
-
-/* ===== 追踪弹窗（追鼠标） ===== */
-function startHunter(){
-  hunterActive=true;
-  const hunter=document.getElementById('hunter');
-  hunter.style.display='block';
-  
-  document.addEventListener('mousemove',e=>{
-    if(!hunterActive) return;
-    // 弹窗瞬移到鼠标旁边（但有偏移，让人抓不到）
-    const offsetX=60+Math.random()*80;
-    const offsetY=40+Math.random()*60;
-    hunter.style.left=(e.clientX+offsetX)+'px';
-    hunter.style.top=(e.clientY+offsetY)+'px';
-    // 随机换文字
-    if(Math.random()<0.1){
-      hunter.textContent=hunterTexts[Math.floor(Math.random()*hunterTexts.length)];
-    }
-  });
-  
-  // 手机端：跟随触摸
-  document.addEventListener('touchmove',e=>{
-    if(!hunterActive) return;
-    const touch=e.touches[0];
-    hunter.style.left=(touch.clientX+60)+'px';
-    hunter.style.top=(touch.clientY+40)+'px';
-  },{passive:true});
-}
-
-/* ===== 假关闭按钮陷阱 ===== */
-function trapFakeClose(){
-  initAudio();
-  activate();
-}
-
-/* ===== 激活（点按钮后） ===== */
-function activate(){
-  initAudio();
-  playLoop();
-  document.getElementById('main').style.display='none';
-  const bs=document.getElementById('bsod');
-  bs.style.display='block';
-  playHum();
-  vibrate([200,100,200]);
-  
-  // 进度条
-  let n=0;
-  const pctText=document.createElement('div');
-  pctText.style.cssText='margin-top:20px;font-size:15px;color:#fff';
-  pctText.textContent='正在收集后悔情绪... 0%';
-  bs.appendChild(pctText);
-  const fill=document.createElement('div');
-  fill.style.cssText='width:80%;height:6px;background:#ffffff33;border-radius:3px;margin:8px auto 0;overflow:hidden';
-  const fillInner=document.createElement('div');
-  fillInner.style.cssText='height:100%;width:0%;background:#ffe600;transition:width .3s';
-  fill.appendChild(fillInner);
-  bs.appendChild(fill);
-  
-  const warningMsg=document.getElementById('warningMsg');
-  
-  const t=setInterval(()=>{
-    n+=Math.floor(Math.random()*7)+1;
-    if(n>=100){n=100;clearInterval(t);
-      pctText.textContent='已完成收集。 100%';
-      warningMsg.style.display='block';
-      // 满屏弹窗 + 追踪弹窗
-      spamPopups();
-      startHunter();
-    }
-    pctText.textContent='正在收集后悔情绪... '+n+'%';
-    fillInner.style.width=n+'%';
-  },180);
-}
-
-/* ===== 终极阻塞（while true alert） ===== */
-function nuclearBlock(){
-  // 这个函数一旦调用，浏览器标签页直接卡死
-  // 无法关闭、无法刷新、无法点击
-  // 唯一退出方式：杀进程（任务管理器 / 强杀 App）
-  while(true){
-    alert('🚫 你以为能关掉？\n\njawiey 的终极封锁已启动。\n\n负心的人不配关闭此网页。\n\n😈 承认错误吧。');
-  }
-}
-
-/* ===== 防退出 ===== */
-function triggerRage(){
-  if(isRaging) return;
-  isRaging=true;
-  playZap();
-  vibrate([500,100,500,100,500,100,500]);
-  
-  // 停止蓝屏电流
-  if(humSource){try{humSource.stop();}catch(e){} humSource=null;}
-  
-  // 显示骂人页
-  document.getElementById('rage').style.display='flex';
-  
-  // 1.5 秒后启动终极阻塞
-  setTimeout(()=>{
-    nuclearBlock();
-  },1500);
-}
-
+// 合法挽留（点 × / 刷新）
 window.addEventListener('beforeunload',e=>{
-  triggerRage();
-  e.preventDefault();
-  e.returnValue='';
-});
-
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden) triggerRage();
-});
-
-/* ===== 禁用一切键 ===== */
-document.addEventListener('keydown',e=>{
-  e.preventDefault();
-  e.stopPropagation();
-  // 额外惩罚
-  if(Math.random()<0.3) playZap();
-  return false;
-});
-
-document.addEventListener('mousedown',e=>{
-  const bs=document.getElementById('bsod');
-  if(bs.style.display==='block'||isRaging){
+  const player=document.getElementById('player');
+  if(player.style.display==='flex'){
     e.preventDefault();
-    e.stopPropagation();
-  }
-});
-
-document.addEventListener('contextmenu',e=>{
-  e.preventDefault();
-});
-
-/* ===== 鼠标靠近顶部 = 提前触发 ===== */
-document.addEventListener('mousemove',e=>{
-  if(e.clientY<50&&!isRaging){
-    // 提前警告
-    const warn=document.createElement('div');
-    warn.style.cssText='position:fixed;top:0;left:0;width:100%;background:#ff1744;color:#fff;text-align:center;padding:8px;z-index:999999;font-size:14px';
-    warn.textContent='⚠️ 检测到你试图靠近关闭按钮，jawiey 已收到警报';
-    document.body.appendChild(warn);
-    setTimeout(()=>warn.remove(),2000);
-  }
-});
-
-/* ===== 页面失去焦点 = 触发 ===== */
-window.addEventListener('blur',() => {
-  if(!isRaging){
-    triggerRage();
+    e.returnValue='';
   }
 });
 </script>
+
 </body>
 </html>

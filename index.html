@@ -6,8 +6,7 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;
-       background:linear-gradient(135deg,#1a1a2e,#16213e);
-       height:100vh;overflow:hidden}
+       background:#000;height:100vh;overflow:hidden;user-select:none}
 
   /* 正常页 */
   .main{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -51,19 +50,26 @@
                       border-radius:3px;margin-top:8px;overflow:hidden}
   .bsod .progress-fill{height:100%;width:0%;background:#fff;
                        transition:width .3s}
-  .bsod .restart-msg{display:none;margin-top:30px;font-size:18px;
+  .bsod .warning-msg{margin-top:30px;font-size:18px;color:#ffeb3b;
                      animation:blink 1s infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
   @keyframes flicker{0%,95%,100%{opacity:1}96%{opacity:.92}97%{opacity:1}
                      98%{opacity:.95}99%{opacity:1}}
 
-  /* 假重启 */
-  .desktop{display:none;position:fixed;inset:0;background:#0078d4;
-           flex-direction:column;align-items:center;justify-content:center;
-           color:#fff;z-index:9997}
-  .desktop .logo{font-size:60px;margin-bottom:20px;animation:spin 2s linear}
-  .desktop p{font-size:20px}
-  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  /* 不听劝骂人页 */
+  .rage{display:none;position:fixed;inset:0;background:#000;color:#ff1744;
+        z-index:99999;flex-direction:column;justify-content:center;
+        align-items:center;text-align:center;padding:40px;
+        animation:shake .15s infinite}
+  .rage h1{font-size:64px;margin-bottom:30px;text-shadow:0 0 40px #ff1744}
+  .rage p{font-size:28px;line-height:1.6;max-width:900px}
+  @keyframes shake{
+    0%{transform:translate(1px,1px)}
+    25%{transform:translate(-1px,0)}
+    50%{transform:translate(1px,-1px)}
+    75%{transform:translate(-1px,1px)}
+    100%{transform:translate(0,1px)}
+  }
 </style>
 </head>
 <body>
@@ -72,7 +78,7 @@
 <div class="main" id="main">
   <h1>🎉 jawiey的神秘网站</h1>
   <p>欢迎来到 jawiey 的地盘，这里什么都没有，除了……</p>
-  <button class="trap-btn" onclick="showWarning()">
+  <button class="trap-btn" onclick="activate()">
     ⚠️ 千万不要点这里 ⚠️
   </button>
   <p style="margin-top:40px;font-size:13px;color:#666">提示：双击页面也有效果哦</p>
@@ -92,7 +98,7 @@
         检测到异常内存访问与内核级冲突。<br>
         若继续运行，可能导致数据永久丢失。<br><br>
         建议立即重启系统以修复错误。<br><br>
-        <span style="color:#c00">错误代码：0x0000007B (INACCESSIBLE_BOOT_DEVICE)</span>
+        <span style="color:#c00">错误代码：0x0000007B</span>
       </div>
       <div style="clear:both"></div>
     </div>
@@ -114,16 +120,59 @@
   </div>
   <div class="pct" id="pctText">正在收集错误信息... 0%</div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="restart-msg" id="restartMsg">↻ 按任意键重新启动...</div>
+  <div class="warning-msg" id="warningMsg" style="display:none">
+    ⚠️ 系统已锁定，无法退出。请联系管理员 jawiey。
+  </div>
 </div>
 
-<!-- 假重启 -->
-<div class="desktop" id="desktop">
-  <div class="logo">⚙️</div>
-  <p>正在重新启动 Windows...</p>
+<!-- 不听劝骂人页 -->
+<div class="rage" id="rage">
+  <h1>⚠️ 不听劝是吧？⚠️</h1>
+  <p>
+    都已经提醒你不要关了。<br><br>
+    现在系统被 jawiey 永久锁定。<br><br>
+    别挣扎了，关不掉就是关不掉。<br><br>
+    😈 乖乖承认错误吧。
+  </p>
 </div>
 
 <script>
+/* ===== 音频系统 ===== */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let humSource = null;
+
+function playHum(){
+  if(humSource) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.value = 60;
+  gain.gain.value = 0.08;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  humSource = osc;
+}
+
+function playZap(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.4);
+}
+
+function activate(){
+  audioCtx.resume();
+  showWarning();
+}
+
 function showWarning(){
   document.getElementById('modal').style.display='flex';
 }
@@ -133,43 +182,62 @@ function bsod(){
   document.getElementById('main').style.display='none';
   const bs=document.getElementById('bsod');
   bs.style.display='block';
+  playHum();
 
   let n=0;
   const pctText=document.getElementById('pctText');
   const fill=document.getElementById('progressFill');
-  const restartMsg=document.getElementById('restartMsg');
+  const warningMsg=document.getElementById('warningMsg');
 
   const t=setInterval(()=>{
     n+=Math.floor(Math.random()*7)+1;
     if(n>=100){n=100;clearInterval(t);
       pctText.textContent='已完成收集。 100%';
-      restartMsg.style.display='block';
+      warningMsg.style.display='block';
     }
     pctText.textContent='正在收集错误信息... '+n+'%';
     fill.style.width=n+'%';
   },180);
 }
 
-function fakeRestart(){
-  document.getElementById('bsod').style.display='none';
-  const desk=document.getElementById('desktop');
-  desk.style.display='flex';
-  setTimeout(()=>{
-    desk.style.display='none';
-    document.getElementById('main').style.display='flex';
-  },3000);
-}
-
-document.addEventListener('dblclick',showWarning);
-document.addEventListener('keydown',function(e){
+/* ===== 禁止一切退出 ===== */
+document.addEventListener('keydown',e=>{
   const bs=document.getElementById('bsod');
   if(bs.style.display==='block'){
     e.preventDefault();
-    fakeRestart();
+    e.stopPropagation();
   }
 });
-document.getElementById('bsod').addEventListener('click',function(){
-  if(this.style.display==='block')fakeRestart();
+
+document.getElementById('bsod').addEventListener('click',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+document.addEventListener('contextmenu',e=>{
+  const bs=document.getElementById('bsod');
+  if(bs.style.display==='block'){
+    e.preventDefault();
+  }
+});
+
+/* ===== 强行关闭 → 骂人 + 电流暴击 ===== */
+window.addEventListener('beforeunload',e=>{
+  const bs=document.getElementById('bsod');
+  if(bs.style.display==='block'){
+    document.getElementById('rage').style.display='flex';
+    playZap();
+    e.preventDefault();
+    e.returnValue='';
+  }
+});
+
+document.addEventListener('visibilitychange',()=>{
+  const bs=document.getElementById('bsod');
+  if(bs.style.display==='block' && document.hidden){
+    document.getElementById('rage').style.display='flex';
+    playZap();
+  }
 });
 </script>
 </body>

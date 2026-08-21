@@ -4,49 +4,165 @@
 <meta charset="UTF-8">
 <title>阿强の神秘网站</title>
 <style>
-  body{margin:0;height:100vh;background:linear-gradient(135deg,#ff9a9e,#fad0c4);
-       font-family:system-ui,sans-serif;overflow:hidden;cursor:crosshair}
-  h1{text-align:center;margin-top:40px;color:#fff;text-shadow:2px 2px 0 #00000022}
-  .bub{position:absolute;background:#fff;color:#1565c0;padding:6px 12px;
-       border-radius:18px;box-shadow:0 4px 10px #0002;animation:fly 3s ease-out forwards;
-       font-weight:bold;pointer-events:none}
-  @keyframes fly{to{transform:translateY(-120vh);opacity:0}}
-  .bsod{position:fixed;inset:0;background:#1f67b3;color:#fff;display:none;
-        flex-direction:column;justify-content:center;align-items:center;font-size:24px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;
+       background:linear-gradient(135deg,#1a1a2e,#16213e);
+       height:100vh;overflow:hidden;cursor:default}
+
+  /* 正常页面 */
+  .main{display:flex;flex-direction:column;align-items:center;justify-content:center;
+        height:100vh;color:#fff;text-align:center;padding:20px}
+  .main h1{font-size:42px;margin-bottom:16px;text-shadow:0 0 20px #ff6b6b}
+  .main p{font-size:18px;color:#ccc;margin-bottom:30px}
+  .trap-btn{background:#e53935;color:#fff;border:none;padding:16px 40px;
+            font-size:20px;border-radius:8px;cursor:pointer;
+            animation:pulse 2s infinite;font-weight:bold;
+            box-shadow:0 4px 15px #e5393555}
+  .trap-btn:hover{background:#ff5252;transform:scale(1.05)}
+  @keyframes pulse{0%,100%{box-shadow:0 4px 15px #e5393555}
+                   50%{box-shadow:0 4px 30px #e53935aa}}
+
+  /* 蓝屏 */
+  .bsod{display:none;position:fixed;inset:0;background:#0078d4;color:#fff;
+        font-family:"Segoe UI",sans-serif;padding:60px 80px;z-index:9999;
+        animation:flicker 8s infinite}
+  .bsod .sad{font-size:120px;margin-bottom:20px;font-weight:100}
+  .bsod h2{font-size:28px;font-weight:400;margin-bottom:20px;line-height:1.4}
+  .bsod .info{font-size:15px;line-height:1.8;margin-bottom:15px;opacity:.9}
+  .bsod .highlight{color:#9ed1ff}
+  .bsod .qr{margin:25px 0;display:inline-block;background:#fff;padding:10px;
+            border-radius:4px}
+  .bsod .qr div{width:100px;height:100px;background:
+    linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),
+    linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%);
+    background-size:20px 20px;background-position:0 0,10px 10px;
+    background-color:#fff}
+  .bsod .stop{font-size:14px;margin-top:15px;opacity:.8}
+  .bsod .pct{margin-top:20px;font-size:16px}
+  .bsod .progress-bar{width:300px;height:6px;background:#ffffff33;
+                      border-radius:3px;margin-top:8px;overflow:hidden}
+  .bsod .progress-fill{height:100%;width:0%;background:#fff;
+                       transition:width .3s}
+  .bsod .restart-msg{display:none;margin-top:30px;font-size:18px;
+                     animation:blink 1s infinite}
+  .bsod .countdown{font-size:48px;margin-top:10px;font-weight:bold;
+                   display:none}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes flicker{0%,95%,100%{opacity:1}96%{opacity:.92}97%{opacity:1}
+                     98%{opacity:.95}99%{opacity:1}}
+
+  /* 假桌面恢复 */
+  .desktop{display:none;position:fixed;inset:0;background:#0078d4;
+           flex-direction:column;align-items:center;justify-content:center;
+           color:#fff;z-index:9998}
+  .desktop .logo{font-size:60px;margin-bottom:20px;animation:spin 2s linear}
+  .desktop p{font-size:20px}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<h1>点哪里都有惊喜 👆（别双击）</h1>
-<div class="bsod" id="bsod">
-  <div style="font-size:80px">:(</div>
-  <p>你的电脑遇到一个搞笑问题，正在收集笑点…<span id="pct">0</span>%</p>
-  <p style="font-size:14px;opacity:.8">（其实是假的，点一下就恢复）</p>
+
+<!-- 正常页面 -->
+<div class="main" id="main">
+  <h1>🎉 阿强的神秘网站</h1>
+  <p>欢迎来到阿强的地盘，这里什么都没有，除了……</p>
+  <button class="trap-btn" onclick="triggerBSOD()">
+    ⚠️ 千万不要点这里 ⚠️
+  </button>
+  <p style="margin-top:40px;font-size:13px;color:#666">提示：双击页面也有效果哦</p>
 </div>
+
+<!-- 蓝屏 -->
+<div class="bsod" id="bsod">
+  <div class="sad">:(</div>
+  <h2>你的电脑遇到问题，需要重新启动。</h2>
+  <h2>我们只收集某些错误信息，然后为你重新启动。</h2>
+  <div class="info">
+    <span class="highlight">100%</span> 完成<br><br>
+    有关此问题的详细信息和可能的解决方法，请访问<br>
+    <span class="highlight">https://www.windows.com/stopcode</span><br><br>
+    如果致电支持人员，请向他们提供以下信息：<br>
+    终止代码：<span class="highlight">CRITICAL_PROCESS_DIED</span><br>
+    支持代码：<span class="highlight">AQIANG-666-LOL</span>
+  </div>
+  <div class="qr">
+    <div></div>
+    <div style="color:#000;font-size:10px;text-align:center;margin-top:4px">
+      SCAN ME
+    </div>
+  </div>
+  <div class="stop">© 2025 Microsoft Corporation. 保留所有权利。</div>
+  <div class="pct" id="pctText">正在收集错误信息... 0%</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="restart-msg" id="restartMsg">↻ 准备就绪。按任意键重新启动...</div>
+  <div class="countdown" id="countdown"></div>
+</div>
+
+<!-- 假重启桌面 -->
+<div class="desktop" id="desktop">
+  <div class="logo">⚙️</div>
+  <p>正在重新启动 Windows...</p>
+  <p style="font-size:14px;margin-top:10px;opacity:.7">（其实是假的，3秒后恢复）</p>
+</div>
+
 <script>
-  const msgs=['你好呀！','666','太酷了','再点一个试试','阿强牛逼','别卷了'];
-  document.body.addEventListener('click',e=>{
-    if(document.getElementById('bsod').style.display==='flex')return;
-    const b=document.createElement('div');
-    b.className='bub';
-    b.textContent=msgs[Math.random()*msgs.length|0];
-    b.style.left=(e.clientX-30)+'px';
-    b.style.top=e.clientY+'px';
-    document.body.appendChild(b);
-    setTimeout(()=>b.remove(),3000);
-  });
-  document.body.addEventListener('dblclick',()=>{
-    const bs=document.getElementById('bsod');
-    bs.style.display='flex';
-    let n=0;
-    const t=setInterval(()=>{
-      n+=Math.floor(Math.random()*9)+1;
-      if(n>=100){n=100;clearInterval(t);}
-      document.getElementById('pct').textContent=n;
-    },120);
-  });
-  document.getElementById('bsod').addEventListener('click',()=>{
-    document.getElementById('bsod').style.display='none';
-  });
+function triggerBSOD(){
+  document.getElementById('main').style.display='none';
+  const bs=document.getElementById('bsod');
+  bs.style.display='block';
+
+  let n=0;
+  const pctText=document.getElementById('pctText');
+  const fill=document.getElementById('progressFill');
+  const restartMsg=document.getElementById('restartMsg');
+  const countdown=document.getElementById('countdown');
+
+  const t=setInterval(()=>{
+    n+=Math.floor(Math.random()*7)+1;
+    if(n>=100){n=100;clearInterval(t);
+      pctText.textContent='已完成收集。 100%';
+      restartMsg.style.display='block';
+      // 10秒后自动"重启"
+      let c=10;
+      countdown.style.display='block';
+      countdown.textContent=c;
+      const ct=setInterval(()=>{
+        c--;
+        countdown.textContent=c;
+        if(c<=0){clearInterval(ct);fakeRestart();}
+      },1000);
+    }
+    pctText.textContent='正在收集错误信息... '+n+'%';
+    fill.style.width=n+'%';
+  },180);
+}
+
+function fakeRestart(){
+  document.getElementById('bsod').style.display='none';
+  const desk=document.getElementById('desktop');
+  desk.style.display='flex';
+  setTimeout(()=>{
+    desk.style.display='none';
+    document.getElementById('main').style.display='flex';
+  },3000);
+}
+
+// 双击也能触发
+document.addEventListener('dblclick',triggerBSOD);
+
+// 蓝屏时按任意键"重启"
+document.addEventListener('keydown',function(e){
+  const bs=document.getElementById('bsod');
+  if(bs.style.display==='block'){
+    e.preventDefault();
+    fakeRestart();
+  }
+});
+
+// 蓝屏时点一下也重启
+document.getElementById('bsod').addEventListener('click',function(){
+  if(this.style.display==='block')fakeRestart();
+});
 </script>
 </body>
 </html>

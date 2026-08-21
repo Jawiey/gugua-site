@@ -11,28 +11,45 @@
        height:100vh;overflow:hidden;user-select:none}
 
   .main{display:flex;flex-direction:column;align-items:center;justify-content:center;
-        height:100vh;color:#fff;text-align:center;padding:20px}
+        height:100vh;color:#fff;text-align:center;padding:20px;z-index:1;position:relative}
   .main h1{font-size:42px;margin-bottom:20px;text-shadow:0 0 20px #e91e63}
   .main p{font-size:18px;margin-bottom:30px;color:#fffde7}
+  .love-btn{background:#e91e63;color:#fff;border:none;padding:16px 44px;
+            font-size:20px;border-radius:40px;cursor:pointer;
+            animation:pulse 2s infinite;font-weight:bold;
+            box-shadow:0 6px 20px #e91e6388}
+  .love-btn:hover{background:#ff4081;transform:scale(1.05)}
+  @keyframes pulse{0%,100%{box-shadow:0 6px 20px #e91e6388}
+                   50%{box-shadow:0 6px 40px #e91e63cc}}
 
-  .fake-close{
-    background:#333;color:#fff;border:none;padding:12px 30px;
-    font-size:16px;border-radius:6px;cursor:pointer;
-    margin-top:20px;animation:glow 1.5s infinite alternate
-  }
-  .fake-close:hover{background:#000}
-  @keyframes glow{
-    from{box-shadow:0 0 10px #ff1744}
-    to{box-shadow:0 0 25px #ff1744}
-  }
+  /* 弹窗样式 */
+  .popup{position:fixed;background:#fff;border:2px solid #e91e63;
+         box-shadow:4px 4px 15px #0005;z-index:9999;
+         min-width:200px;max-width:350px;
+         animation:popIn .2s ease-out}
+  .popup .title{background:#e91e63;color:#fff;padding:6px 10px;
+                font-size:13px;font-weight:bold;
+                display:flex;justify-content:space-between}
+  .popup .body{padding:15px;font-size:14px;color:#333;line-height:1.5}
+  .popup .btns{text-align:right;padding:8px 15px;border-top:1px solid #eee}
+  .popup button{background:#e91e63;color:#fff;border:none;
+                padding:5px 18px;font-size:13px;border-radius:3px;
+                cursor:pointer}
+  .popup button:hover{background:#ff4081}
+  @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 
+  /* 蓝屏 */
   .bsod{display:none;position:fixed;inset:0;background:#0b66c3;color:#fff;
-        font-family:"Segoe UI",sans-serif;padding:40px 20px;z-index:9998}
+        font-family:"Segoe UI",sans-serif;padding:40px 20px;z-index:8888;
+        animation:flicker 8s infinite}
   .bsod .sad{font-size:80px;margin-bottom:20px}
   .bsod h2{font-size:22px;font-weight:400;margin-bottom:20px}
   .bsod .info{font-size:15px;line-height:1.8}
   .bsod .highlight{color:#ffe600}
+  @keyframes flicker{0%,95%,100%{opacity:1}96%{opacity:.92}97%{opacity:1}
+                     98%{opacity:.95}99%{opacity:1}}
 
+  /* 骂人页 */
   .rage{display:none;position:fixed;inset:0;background:#000;color:#ff1744;
         z-index:99999;flex-direction:column;justify-content:center;
         align-items:center;text-align:center;padding:30px;
@@ -52,43 +69,60 @@
 
 <div class="main" id="main">
   <h1>💗 jawiey 的表白 💗</h1>
-  <p>点下面这个按钮，可以“安全关闭”哦～</p>
-
-  <!-- 假关闭按钮 -->
-  <button class="fake-close" onclick="trapClose()">
-    ❌ 关闭网页
+  <p>你愿意做我的人吗？</p>
+  <button class="love-btn" onclick="activate()">
+    ❤️ 点这里接受表白 ❤️
   </button>
-
-  <p style="margin-top:40px;font-size:14px;color:#fff9c4">
-    （真的可以关，不信你试试）
-  </p>
 </div>
 
 <div class="bsod" id="bsod">
   <div class="sad">💔</div>
-  <h2>你刚刚点了“关闭”。</h2>
+  <h2>你的心遇到问题，需要重新爱上 jawiey。</h2>
   <div class="info">
-    系统判定你 <span class="highlight">不爱 jawiey</span>。<br><br>
-    正在收集你的后悔情绪…<br><br>
-    支持代码：<span class="highlight">JAWIEY-CLOSE-TRAP-666</span>
+    错误类型：<span class="highlight">HEART_PROCESS_DIED</span><br>
+    支持代码：<span class="highlight">JAWIEY-LOVE-666</span><br><br>
+    系统已锁定。<br>
+    关闭按钮已被弹窗淹没。
   </div>
 </div>
 
 <div class="rage" id="rage">
-  <h1>💢 你居然真敢点关闭 💢</h1>
+  <h1>💢 关不掉吧？💢</h1>
   <p>
-    我都这么用心了，你还要跑？<br><br>
-    现在你已经被 jawiey 的<br>
-    <b>“真爱干扰系统”</b> 锁定。<br><br>
-    关不掉，退不了，<br>
-    只能乖乖承认错误。
+    弹窗海战术启动。<br><br>
+    关闭按钮已经不存在了。<br><br>
+    jawiey 赢了。
   </p>
 </div>
 
 <script>
+const messages = [
+  "⚠️ 系统检测到你想逃跑",
+  "💔 jawiey 很伤心",
+  "😈 你跑不掉了",
+  "📢 关闭按钮已被淹没",
+  "💗 承认错误就能解脱",
+  "🔒 系统已锁定",
+  "⚡ 不听劝是吧？",
+  "📳 手机在震对吧？",
+  "🖥️ 电脑也卡了吧？",
+  "💀 这就是代价",
+  "📌 你每关一个，我弹两个",
+  "🫠 累了吗？承认吧",
+  "📡 已上报 jawiey",
+  "🚫 此网页不允许关闭",
+  "💢 负心的人没有好下场",
+  "📵 请勿试图离开",
+  "🦇 暗影弹窗已部署",
+  "🕳️ 你越挣扎陷越深",
+  "🪤 你中了 jawiey 的陷阱",
+  "🫶 爱 jawiey 是唯一出路"
+];
+
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
 let isRaging = false;
+let popupCount = 0;
 
 function init(){
   if(!audioCtx) audioCtx = new AudioCtx();
@@ -100,14 +134,13 @@ function vibrate(p){
 }
 
 function playZap(){
-  if(!audioCtx||isRaging) return;
-  isRaging=true;
+  if(!audioCtx) return;
   const osc=audioCtx.createOscillator();
   const gain=audioCtx.createGain();
   osc.type='square';
   osc.frequency.setValueAtTime(200,audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(40,audioCtx.currentTime+0.3);
-  gain.gain.setValueAtTime(0.5,audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.4,audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.4);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -115,15 +148,72 @@ function playZap(){
   osc.stop(audioCtx.currentTime+0.4);
 }
 
-/* 假关闭按钮陷阱 */
-function trapClose(){
+/* 创建单个弹窗 */
+function createPopup(text, x, y){
+  const popup=document.createElement('div');
+  popup.className='popup';
+  popup.style.left=Math.min(x,window.innerWidth-250)+'px';
+  popup.style.top=Math.min(y,window.innerHeight-150)+'px';
+  popup.innerHTML=`
+    <div class="title"><span>jawiey 的系统</span><span>⚠️</span></div>
+    <div class="body">${text}</div>
+    <div class="btns"><button onclick="onPopupClick(event)">确定</button></div>
+  `;
+  document.body.appendChild(popup);
+  popupCount++;
+  return popup;
+}
+
+/* 点弹窗的确定 → 关掉这个，再弹2个新的 */
+function onPopupClick(e){
+  e.stopPropagation();
+  const popup=e.target.closest('.popup');
+  if(popup) popup.remove();
+  popupCount--;
+  // 弹2个新的
+  for(let i=0;i<2;i++){
+    const x=Math.random()*(window.innerWidth-200);
+    const y=Math.random()*(window.innerHeight-120);
+    const msg=messages[Math.floor(Math.random()*messages.length)];
+    createPopup(msg,x,y);
+  }
+  playZap();
+  vibrate([100,50,100]);
+}
+
+/* 满屏弹窗轰炸 */
+function spamPopups(){
+  // 先铺 20 个
+  for(let i=0;i<20;i++){
+    const x=Math.random()*window.innerWidth;
+    const y=Math.random()*window.innerHeight;
+    const msg=messages[Math.floor(Math.random()*messages.length)];
+    createPopup(msg,x,y);
+  }
+  // 然后每 800ms 再补 5 个，保持满屏
+  setInterval(()=>{
+    for(let i=0;i<5;i++){
+      const x=Math.random()*window.innerWidth;
+      const y=Math.random()*window.innerHeight;
+      const msg=messages[Math.floor(Math.random()*messages.length)];
+      createPopup(msg,x,y);
+    }
+  },800);
+}
+
+/* 激活 */
+function activate(){
   init();
   document.getElementById('main').style.display='none';
   document.getElementById('bsod').style.display='block';
   vibrate([200,100,200]);
+  // 1.5秒后开始弹窗轰炸
+  setTimeout(()=>{
+    spamPopups();
+  },1500);
 }
 
-/* 真关闭干扰 */
+/* 终极防退出 */
 function triggerRage(){
   if(isRaging) return;
   isRaging=true;
@@ -132,7 +222,6 @@ function triggerRage(){
   document.getElementById('rage').style.display='flex';
 }
 
-/* 点 × / 切后台 */
 window.addEventListener('beforeunload',e=>{
   triggerRage();
   e.preventDefault();
@@ -140,16 +229,16 @@ window.addEventListener('beforeunload',e=>{
 });
 
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){
-    triggerRage();
-  }
+  if(document.hidden) triggerRage();
 });
 
-/* PC：鼠标靠近顶部 = 干扰 */
-document.addEventListener('mousemove',e=>{
-  if(e.clientY < 40){
-    triggerRage();
-  }
+document.addEventListener('keydown',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+document.addEventListener('contextmenu',e=>{
+  e.preventDefault();
 });
 </script>
 </body>

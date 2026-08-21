@@ -7,9 +7,9 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;
        background:linear-gradient(135deg,#1a1a2e,#16213e);
-       height:100vh;overflow:hidden;cursor:default}
+       height:100vh;overflow:hidden}
 
-  /* 正常页面 */
+  /* 正常页 */
   .main{display:flex;flex-direction:column;align-items:center;justify-content:center;
         height:100vh;color:#fff;text-align:center;padding:20px}
   .main h1{font-size:42px;margin-bottom:16px;text-shadow:0 0 20px #ff6b6b}
@@ -22,22 +22,30 @@
   @keyframes pulse{0%,100%{box-shadow:0 4px 15px #e5393555}
                    50%{box-shadow:0 4px 30px #e53935aa}}
 
+  /* 假系统弹窗 */
+  .modal{display:none;position:fixed;inset:0;background:#00000088;
+         justify-content:center;align-items:center;z-index:9999}
+  .dialog{width:420px;background:#f0f0f0;border:1px solid #003c74;
+          box-shadow:4px 4px 10px #0005;font-family:"Segoe UI",sans-serif}
+  .dialog .title{background:linear-gradient(90deg,#005a9e,#0078d4);
+                 color:#fff;padding:6px 10px;font-size:14px;
+                 display:flex;justify-content:space-between;align-items:center}
+  .dialog .title span{font-weight:bold}
+  .dialog .body{padding:20px;font-size:13px;color:#222;line-height:1.6}
+  .dialog .icon{float:left;margin-right:12px;font-size:32px}
+  .dialog .btns{text-align:right;padding:10px 20px 15px}
+  .dialog button{background:#e1e1e1;border:1px solid #003c74;
+                 padding:6px 20px;font-size:13px;cursor:pointer}
+  .dialog button:hover{background:#cde6ff}
+
   /* 蓝屏 */
   .bsod{display:none;position:fixed;inset:0;background:#0078d4;color:#fff;
-        font-family:"Segoe UI",sans-serif;padding:60px 80px;z-index:9999;
+        font-family:"Segoe UI",sans-serif;padding:60px 80px;z-index:9998;
         animation:flicker 8s infinite}
   .bsod .sad{font-size:120px;margin-bottom:20px;font-weight:100}
   .bsod h2{font-size:28px;font-weight:400;margin-bottom:20px;line-height:1.4}
   .bsod .info{font-size:15px;line-height:1.8;margin-bottom:15px;opacity:.9}
   .bsod .highlight{color:#9ed1ff}
-  .bsod .qr{margin:25px 0;display:inline-block;background:#fff;padding:10px;
-            border-radius:4px}
-  .bsod .qr div{width:100px;height:100px;background:
-    linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),
-    linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%);
-    background-size:20px 20px;background-position:0 0,10px 10px;
-    background-color:#fff}
-  .bsod .stop{font-size:14px;margin-top:15px;opacity:.8}
   .bsod .pct{margin-top:20px;font-size:16px}
   .bsod .progress-bar{width:300px;height:6px;background:#ffffff33;
                       border-radius:3px;margin-top:8px;overflow:hidden}
@@ -45,16 +53,14 @@
                        transition:width .3s}
   .bsod .restart-msg{display:none;margin-top:30px;font-size:18px;
                      animation:blink 1s infinite}
-  .bsod .countdown{font-size:48px;margin-top:10px;font-weight:bold;
-                   display:none}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
   @keyframes flicker{0%,95%,100%{opacity:1}96%{opacity:.92}97%{opacity:1}
                      98%{opacity:.95}99%{opacity:1}}
 
-  /* 假桌面恢复 */
+  /* 假重启 */
   .desktop{display:none;position:fixed;inset:0;background:#0078d4;
            flex-direction:column;align-items:center;justify-content:center;
-           color:#fff;z-index:9998}
+           color:#fff;z-index:9997}
   .desktop .logo{font-size:60px;margin-bottom:20px;animation:spin 2s linear}
   .desktop p{font-size:20px}
   @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -62,14 +68,38 @@
 </head>
 <body>
 
-<!-- 正常页面 -->
+<!-- 正常页 -->
 <div class="main" id="main">
   <h1>🎉 阿强的神秘网站</h1>
   <p>欢迎来到阿强的地盘，这里什么都没有，除了……</p>
-  <button class="trap-btn" onclick="triggerBSOD()">
+  <button class="trap-btn" onclick="showWarning()">
     ⚠️ 千万不要点这里 ⚠️
   </button>
   <p style="margin-top:40px;font-size:13px;color:#666">提示：双击页面也有效果哦</p>
+</div>
+
+<!-- 假系统警告 -->
+<div class="modal" id="modal">
+  <div class="dialog">
+    <div class="title">
+      <span>Microsoft Windows</span>
+      <span style="cursor:pointer" onclick="bsod()">✕</span>
+    </div>
+    <div class="body">
+      <div class="icon">⚠️</div>
+      <div>
+        <b>关键系统错误</b><br><br>
+        检测到异常内存访问与内核级冲突。<br>
+        若继续运行，可能导致数据永久丢失。<br><br>
+        建议立即重启系统以修复错误。<br><br>
+        <span style="color:#c00">错误代码：0x0000007B (INACCESSIBLE_BOOT_DEVICE)</span>
+      </div>
+      <div style="clear:both"></div>
+    </div>
+    <div class="btns">
+      <button onclick="bsod()">确定</button>
+    </div>
+  </div>
 </div>
 
 <!-- 蓝屏 -->
@@ -79,34 +109,27 @@
   <h2>我们只收集某些错误信息，然后为你重新启动。</h2>
   <div class="info">
     <span class="highlight">100%</span> 完成<br><br>
-    有关此问题的详细信息和可能的解决方法，请访问<br>
-    <span class="highlight">https://www.windows.com/stopcode</span><br><br>
-    如果致电支持人员，请向他们提供以下信息：<br>
     终止代码：<span class="highlight">CRITICAL_PROCESS_DIED</span><br>
     支持代码：<span class="highlight">AQIANG-666-LOL</span>
   </div>
-  <div class="qr">
-    <div></div>
-    <div style="color:#000;font-size:10px;text-align:center;margin-top:4px">
-      SCAN ME
-    </div>
-  </div>
-  <div class="stop">© 2025 Microsoft Corporation. 保留所有权利。</div>
   <div class="pct" id="pctText">正在收集错误信息... 0%</div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="restart-msg" id="restartMsg">↻ 准备就绪。按任意键重新启动...</div>
-  <div class="countdown" id="countdown"></div>
+  <div class="restart-msg" id="restartMsg">↻ 按任意键重新启动...</div>
 </div>
 
-<!-- 假重启桌面 -->
+<!-- 假重启 -->
 <div class="desktop" id="desktop">
   <div class="logo">⚙️</div>
   <p>正在重新启动 Windows...</p>
-  <p style="font-size:14px;margin-top:10px;opacity:.7">（其实是假的，3秒后恢复）</p>
 </div>
 
 <script>
-function triggerBSOD(){
+function showWarning(){
+  document.getElementById('modal').style.display='flex';
+}
+
+function bsod(){
+  document.getElementById('modal').style.display='none';
   document.getElementById('main').style.display='none';
   const bs=document.getElementById('bsod');
   bs.style.display='block';
@@ -115,22 +138,12 @@ function triggerBSOD(){
   const pctText=document.getElementById('pctText');
   const fill=document.getElementById('progressFill');
   const restartMsg=document.getElementById('restartMsg');
-  const countdown=document.getElementById('countdown');
 
   const t=setInterval(()=>{
     n+=Math.floor(Math.random()*7)+1;
     if(n>=100){n=100;clearInterval(t);
       pctText.textContent='已完成收集。 100%';
       restartMsg.style.display='block';
-      // 10秒后自动"重启"
-      let c=10;
-      countdown.style.display='block';
-      countdown.textContent=c;
-      const ct=setInterval(()=>{
-        c--;
-        countdown.textContent=c;
-        if(c<=0){clearInterval(ct);fakeRestart();}
-      },1000);
     }
     pctText.textContent='正在收集错误信息... '+n+'%';
     fill.style.width=n+'%';
@@ -147,10 +160,7 @@ function fakeRestart(){
   },3000);
 }
 
-// 双击也能触发
-document.addEventListener('dblclick',triggerBSOD);
-
-// 蓝屏时按任意键"重启"
+document.addEventListener('dblclick',showWarning);
 document.addEventListener('keydown',function(e){
   const bs=document.getElementById('bsod');
   if(bs.style.display==='block'){
@@ -158,8 +168,6 @@ document.addEventListener('keydown',function(e){
     fakeRestart();
   }
 });
-
-// 蓝屏时点一下也重启
 document.getElementById('bsod').addEventListener('click',function(){
   if(this.style.display==='block')fakeRestart();
 });

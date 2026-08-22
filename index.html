@@ -13,6 +13,7 @@
       overflow: hidden;
       height: 100vh;
       width: 100vw;
+      background: #000;
     }
 
     /* 年龄验证封面 */
@@ -29,7 +30,6 @@
       z-index: 1000;
     }
 
-    /* 半透明遮罩 + 轻微模糊，让文字更清晰 */
     #age-cover::after {
       content: '';
       position: absolute;
@@ -94,7 +94,7 @@
       backdrop-filter: blur(2px);
     }
 
-    /* 播放器 */
+    /* 播放器（手机端撑满） */
     .player {
       display: none;
       position: fixed;
@@ -107,9 +107,9 @@
     }
 
     .player video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
     }
 
     .credit {

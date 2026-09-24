@@ -2,103 +2,223 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>收到了一个祝福</title>
 <style>
-  body { margin:0; padding:0; background:#1a0b2e; overflow:hidden; touch-action:manipulation; font-family: sans-serif; }
-  .pop { position:fixed; width:110px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#333; font-size:14px; box-shadow:0 4px 12px rgba(0,0,0,0.3); animation: fade .3s ease-out; z-index:10; }
-  .full { position:fixed; width:90px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#333; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.2); animation: fade .2s ease-out; z-index:20; }
-  .final { position:fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; z-index:30; pointer-events:none; opacity:0; transition: opacity 1s; }
-  .final.show { opacity:1; pointer-events:auto; }
-  .heart { font-size:80px; animation: beat 1s infinite; }
-  .line { font-size:32px; margin-top:20px; letter-spacing:4px; }
-  .sub { font-size:16px; margin-top:10px; opacity:0.8; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    width:100%;
+    height:100%;
+    height:100dvh;
+    overflow:hidden;
+    background:#1a0b2e;
+    font-family:"微软雅黑", sans-serif;
+  }
+  body { -webkit-tap-highlight-color: transparent; }
+
+  /* 全屏承载层 */
+  #stage {
+    position:fixed;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    height:100dvh;
+    overflow:hidden;
+    pointer-events:none;
+  }
+
+  .pop, .full {
+    position:absolute;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    border-radius:12px;
+    color:#333;
+    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+    z-index:10;
+    animation:fade .3s ease-out;
+  }
+  .full { border-radius:10px; animation:fade .2s ease-out; z-index:20; }
+
+  /* 结局全屏层 */
+  .final {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:#1a0b2e;
+    z-index:100;
+    opacity:0;
+    pointer-events:none;
+  }
+  .final.show { opacity:1; pointer-events:auto; transition:opacity 1s; }
+
+  .heart { font-size:80px; animation:beat 1s infinite; }
+  .line { font-size:32px; color:#fff; margin-top:15px; letter-spacing:4px; }
+  .sub  { font-size:16px; color:#ff69b4; margin-top:10px; opacity:0.8; }
+
+  /* 顶部装饰文字 */
+  .top-text {
+    position:fixed;
+    top:20px; left:0; width:100%;
+    text-align:center;
+    color:#ff69b4;
+    font-size:22px;
+    z-index:50;
+    pointer-events:none;
+    text-shadow:0 2px 8px rgba(255,105,180,0.4);
+  }
+
   @keyframes beat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
-  @keyframes fade { from{opacity:0} to{opacity:1} }
-  .top-text { position:fixed; top:20px; width:100%; text-align:center; color:#ff69b4; font-size:24px; z-index:50; pointer-events:none; }
+  @keyframes fade { from{opacity:0; transform:scale(.5)} to{opacity:1; transform:scale(1)} }
 </style>
 </head>
 <body>
-<div class="top-text">可会变（谁没在变）<br><span style="font-size:16px;">ho wui bin (sui mua goi bin)</span></div>
+
+<div class="top-text">可会变（谁没在变）<br><span style="font-size:14px;">ho wui bin (sui mua goi bin)</span></div>
+
+<div id="stage"></div>
+
 <div class="final" id="final">
   <div class="heart">❤️</div>
-  <div class="line">中秋快乐</div>
-  <div class="sub">祝福已送达</div>
+  <div class="line">祝福已送达</div>
+  <div class="sub">点击屏幕可重新开始</div>
 </div>
 
 <script>
 const tips = ["多喝热水","好好爱自己","好好吃饭","保持好心情","我想你了","顺顺利利","别熬夜","天凉了多穿衣服"];
 const colors = ["#FFC0CB","#ADD8E6","#90EE90","#FAFAD2","#FF69B4","#87CEFA"];
+const stage = document.getElementById('stage');
+const finalLayer = document.getElementById('final');
+let running = false;
 
-function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function rand(a,b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 
-function heart(n){
-  const pts=[];
-  for(let i=0;i<n;i++){
-    const th = i/n*2*Math.PI;
-    const x = 16*Math.pow(Math.sin(th),3);
-    const y = 13*Math.cos(th)-5*Math.cos(2*th)-2*Math.cos(3*th)-Math.cos(4*th);
+// 读取安全区域（刘海屏 & 底部横条）
+function safeArea() {
+  const style = getComputedStyle(document.documentElement);
+  const top = parseFloat(style.getPropertyValue('--safe-area-inset-top')) || 0;
+  const bottom = parseFloat(style.getPropertyValue('--safe-area-inset-bottom')) || 0;
+  return { top, bottom };
+}
+
+// 获取真实可视尺寸（避开地址栏变化）
+function viewportSize() {
+  if (window.visualViewport) {
+    return { w: window.visualViewport.width, h: window.visualViewport.height };
+  }
+  return { w: window.innerWidth, h: window.innerHeight };
+}
+
+// 爱心参数方程（与原版一致）
+function heart(n) {
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const th = i / n * 2 * Math.PI;
+    const x = 16 * Math.pow(Math.sin(th), 3);
+    const y = 13 * Math.cos(th) - 5 * Math.cos(2 * th) - 2 * Math.cos(3 * th) - Math.cos(4 * th);
     pts.push({x, y});
   }
   return pts;
 }
 
-function makeDiv(cls, text){
+// 创建弹窗，返回 DOM 元素
+function makePop(cls, text, x, y, w, h) {
   const d = document.createElement('div');
   d.className = cls;
-  const w = window.innerWidth, h = window.innerHeight;
-  const pw = cls === 'pop' ? 110 : 90;
-  const ph = cls === 'pop' ? 48 : 40;
-  d.style.left = rand(0, w-pw)+'px';
-  d.style.top  = rand(0, h-ph)+'px';
-  d.style.background = colors[rand(0,colors.length-1)];
-  d.textContent = text || tips[rand(0,tips.length-1)];
-  document.body.appendChild(d);
+  d.style.left = x + 'px';
+  d.style.top = y + 'px';
+  d.style.width = w + 'px';
+  d.style.height = h + 'px';
+  d.style.background = colors[rand(0, colors.length - 1)];
+  d.textContent = text || tips[rand(0, tips.length - 1)];
+  stage.appendChild(d);
   return d;
 }
 
-async function showHeart(){
-  const w = window.innerWidth, h = window.innerHeight;
+// 爱心动画
+async function showHeart() {
+  const { w, h } = viewportSize();
+  const safe = safeArea();
+  const usableH = h - safe.top - safe.bottom;
+
+  // 弹窗宽高随屏幕宽度等比变化
+  const pw = Math.min(110, w * 0.26);
+  const ph = Math.round(pw * 0.45);
+
+  // 爱心整体尺寸：占屏最小边的 75%
+  const heartSize = Math.min(w, usableH) * 0.75;
+  const unit = heartSize / 32; // 爱心 x 范围约 32 个单位
+
+  const cx = w / 2;
+  const cy = safe.top + usableH / 2;
+
   const pts = heart(200);
   const pops = [];
-  const scale = Math.min(w / 500, h / 800) * 0.9;
-  
-  for(const p of pts){
-    const sx = w/2 + p.x * (16 * scale) - 55;
-    const sy = h/2 - p.y * (16 * scale) - 40;
-    const d = document.createElement('div');
-    d.className = 'pop';
-    d.style.left = Math.max(0,Math.min(sx,w-110))+'px';
-    d.style.top  = Math.max(0,Math.min(sy,h-48))+'px';
-    d.style.background = colors[rand(0,colors.length-1)];
-    d.textContent = tips[rand(0,tips.length-1)];
-    document.body.appendChild(d);
+
+  for (const p of pts) {
+    const px = cx + p.x * unit - pw / 2;
+    const py = cy - p.y * unit - ph / 2;
+    const d = makePop('pop', null, px, py, pw, ph);
     pops.push(d);
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 25));
   }
+
   await new Promise(r => setTimeout(r, 3000));
   pops.forEach(p => p.remove());
 }
 
-async function showFull(){
+// 满屏弹窗
+async function showFull() {
+  const { w, h } = viewportSize();
+  const safe = safeArea();
+  const usableW = w;
+  const usableH = h - safe.top - safe.bottom;
+
+  const pw = Math.min(90, w * 0.22);
+  const ph = Math.round(pw * 0.45);
+
+  const count = w < 600 ? 100 : 250; // 手机减少数量防卡
   const arr = [];
-  const count = window.innerWidth < 768 ? 150 : 260;
-  for(let i=0;i<count;i++){
-    arr.push(makeDiv('full'));
+
+  for (let i = 0; i < count; i++) {
+    const px = safe.top + Math.random() * (usableW - pw); // 忽略 safe.left（竖屏不存在）
+    const py = safe.top + Math.random() * (usableH - ph);
+    const d = makePop('full', null, px, py, pw, ph);
+    arr.push(d);
     await new Promise(r => setTimeout(r, 10));
   }
+
   await new Promise(r => setTimeout(r, 5000));
   arr.forEach(p => p.remove());
 }
 
-async function start(){
+// 主流程
+async function start() {
+  if (running) return;
+  running = true;
+  finalLayer.classList.remove('show');
+
+  // 清空旧弹窗
+  stage.innerHTML = '';
+
   await showHeart();
   await showFull();
-  document.getElementById('final').classList.add('show');
+
+  finalLayer.classList.add('show');
+  running = false;
 }
 
-// 页面加载后自动开始动画
-window.onload = start;
+// 页面加载后自动开始，无需点击
+window.addEventListener('load', () => setTimeout(start, 600));
+
+// 结局层点击可重新看
+finalLayer.addEventListener('click', start);
+finalLayer.addEventListener('touchstart', start);
 </script>
 </body>
 </html>

@@ -1,43 +1,36 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 关键：设置移动端视口，禁止缩放 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>收到了一个祝福</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #1a0a2e; }
-  body { font-family: "Microsoft YaHei", sans-serif; }
-
-  /* 爱心弹窗 */
-  .pop {
-    position: fixed; width: 130px; height: 56px;
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 15px; color: #333; box-shadow: 0 4px 14px rgba(0,0,0,.4);
-    animation: pop .3s ease; z-index: 9;
+  body{margin:0;padding:0;background:#1a0f2e;overflow:hidden;font-family: sans-serif;}
+  .pop{
+    position:fixed;width:110px;height:48px;
+    border-radius:12px;display:flex;align-items:center;justify-content:center;
+    color:#333;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    animation: fade .3s ease;
   }
-  @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-  /* 满屏弹窗 */
-  .full {
-    position: fixed; width: 130px; height: 56px;
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 15px; color: #333; box-shadow: 0 4px 14px rgba(0,0,0,.4);
-    animation: pop .25s ease; z-index: 9;
+  .full{
+    position:fixed;width:90px;height:40px;
+    border-radius:10px;display:flex;align-items:center;justify-content:center;
+    color:#333;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    animation: fade .2s ease;
   }
-
-  /* 结局大字 */
-  .final {
-    position: fixed; inset: 0; display: none; flex-direction: column;
-    align-items: center; justify-content: center; z-index: 99;
-    background: radial-gradient(circle at center, #2a1052 0%, #0d0015 100%);
+  .final{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:#fff;text-align:center;opacity:0;pointer-events:none;transition:opacity 1s;
+    background:rgba(26,15,46,0.95);z-index:999;
   }
-  .final.show { display: flex; animation: fade 1s ease; }
-  .final .heart { font-size: 80px; animation: beat 1s infinite; }
-  .final .line { color: #ffd6e8; font-size: 26px; margin-top: 18px; letter-spacing: 4px; }
-  .final .sub  { color: #c9a0c9; font-size: 16px; margin-top: 12px; }
-  @keyframes beat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
-  @keyframes fade { from{opacity:0} to{opacity:1} }
+  .show{opacity:1;pointer-events:auto;}
+  .heart{font-size:80px;animation: beat 1s infinite alternate;}
+  .line{font-size:32px;margin-top:20px;font-weight:bold;}
+  .sub{font-size:16px;margin-top:15px;opacity:0.8;}
+  @keyframes beat{from{transform:scale(1)} to{transform:scale(1.15)}}
+  @keyframes fade{from{opacity:0} to{opacity:1}}
 </style>
 </head>
 <body>
@@ -54,7 +47,6 @@ let started = false;
 
 function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 
-// 爱心参数方程，和 Python 版完全一致
 function heart(n){
   const pts=[];
   for(let i=0;i<n;i++){
@@ -70,8 +62,13 @@ function makeDiv(cls, text){
   const d = document.createElement('div');
   d.className = cls;
   const w = window.innerWidth, h = window.innerHeight;
-  d.style.left = rand(0, w-130)+'px';
-  d.style.top  = rand(0, h-56)+'px';
+  
+  // 移动端适配：弹窗尺寸变小，防止重叠
+  const pw = cls === 'pop' ? 110 : 90;
+  const ph = cls === 'pop' ? 48 : 40;
+  
+  d.style.left = rand(0, w-pw)+'px';
+  d.style.top  = rand(0, h-ph)+'px';
   d.style.background = colors[rand(0,colors.length-1)];
   d.textContent = text || tips[rand(0,tips.length-1)];
   document.body.appendChild(d);
@@ -82,13 +79,19 @@ async function showHeart(){
   const w = window.innerWidth, h = window.innerHeight;
   const pts = heart(200);
   const pops = [];
+  
+  // 动态计算缩放比例，适配手机小屏幕
+  const scale = Math.min(w / 500, h / 800) * 0.9;
+  
   for(const p of pts){
-    const sx = w/2 + p.x*16 - 65;
-    const sy = h/2 - p.y*16 - 40;
+    // 动态调整爱心位置和大小
+    const sx = w/2 + p.x * (16 * scale) - 55;
+    const sy = h/2 - p.y * (16 * scale) - 40;
+    
     const d = document.createElement('div');
     d.className = 'pop';
-    d.style.left = Math.max(0,Math.min(sx,w-130))+'px';
-    d.style.top  = Math.max(0,Math.min(sy,h-56))+'px';
+    d.style.left = Math.max(0,Math.min(sx,w-110))+'px';
+    d.style.top  = Math.max(0,Math.min(sy,h-48))+'px';
     d.style.background = colors[rand(0,colors.length-1)];
     d.textContent = tips[rand(0,tips.length-1)];
     document.body.appendChild(d);
@@ -101,7 +104,10 @@ async function showHeart(){
 
 async function showFull(){
   const arr = [];
-  for(let i=0;i<260;i++){
+  // 手机性能较弱，弹窗数量适当减少防卡顿
+  const count = window.innerWidth < 768 ? 150 : 260;
+  
+  for(let i=0;i<count;i++){
     arr.push(makeDiv('full'));
     await new Promise(r => setTimeout(r, 10));
   }

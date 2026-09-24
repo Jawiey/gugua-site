@@ -2,48 +2,33 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<!-- 关键：设置移动端视口，禁止缩放 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>收到了一个祝福</title>
 <style>
-  body{margin:0;padding:0;background:#1a0f2e;overflow:hidden;font-family: sans-serif;}
-  .pop{
-    position:fixed;width:110px;height:48px;
-    border-radius:12px;display:flex;align-items:center;justify-content:center;
-    color:#333;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.3);
-    animation: fade .3s ease;
-  }
-  .full{
-    position:fixed;width:90px;height:40px;
-    border-radius:10px;display:flex;align-items:center;justify-content:center;
-    color:#333;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.2);
-    animation: fade .2s ease;
-  }
-  .final{
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    color:#fff;text-align:center;opacity:0;pointer-events:none;transition:opacity 1s;
-    background:rgba(26,15,46,0.95);z-index:999;
-  }
-  .show{opacity:1;pointer-events:auto;}
-  .heart{font-size:80px;animation: beat 1s infinite alternate;}
-  .line{font-size:32px;margin-top:20px;font-weight:bold;}
-  .sub{font-size:16px;margin-top:15px;opacity:0.8;}
-  @keyframes beat{from{transform:scale(1)} to{transform:scale(1.15)}}
-  @keyframes fade{from{opacity:0} to{opacity:1}}
+  body { margin:0; padding:0; background:#1a0b2e; overflow:hidden; touch-action:manipulation; font-family: sans-serif; }
+  .pop { position:fixed; width:110px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#333; font-size:14px; box-shadow:0 4px 12px rgba(0,0,0,0.3); animation: fade .3s ease-out; z-index:10; }
+  .full { position:fixed; width:90px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#333; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.2); animation: fade .2s ease-out; z-index:20; }
+  .final { position:fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; z-index:30; pointer-events:none; opacity:0; transition: opacity 1s; }
+  .final.show { opacity:1; pointer-events:auto; }
+  .heart { font-size:80px; animation: beat 1s infinite; }
+  .line { font-size:32px; margin-top:20px; letter-spacing:4px; }
+  .sub { font-size:16px; margin-top:10px; opacity:0.8; }
+  @keyframes beat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+  @keyframes fade { from{opacity:0} to{opacity:1} }
+  .top-text { position:fixed; top:20px; width:100%; text-align:center; color:#ff69b4; font-size:24px; z-index:50; pointer-events:none; }
 </style>
 </head>
 <body>
+<div class="top-text">可会变（谁没在变）<br><span style="font-size:16px;">ho wui bin (sui mua goi bin)</span></div>
 <div class="final" id="final">
   <div class="heart">❤️</div>
   <div class="line">中秋快乐</div>
-  <div class="sub">点一下屏幕，让祝福开始</div>
+  <div class="sub">祝福已送达</div>
 </div>
 
 <script>
 const tips = ["多喝热水","好好爱自己","好好吃饭","保持好心情","我想你了","顺顺利利","别熬夜","天凉了多穿衣服"];
 const colors = ["#FFC0CB","#ADD8E6","#90EE90","#FAFAD2","#FF69B4","#87CEFA"];
-let started = false;
 
 function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 
@@ -62,11 +47,8 @@ function makeDiv(cls, text){
   const d = document.createElement('div');
   d.className = cls;
   const w = window.innerWidth, h = window.innerHeight;
-  
-  // 移动端适配：弹窗尺寸变小，防止重叠
   const pw = cls === 'pop' ? 110 : 90;
   const ph = cls === 'pop' ? 48 : 40;
-  
   d.style.left = rand(0, w-pw)+'px';
   d.style.top  = rand(0, h-ph)+'px';
   d.style.background = colors[rand(0,colors.length-1)];
@@ -79,15 +61,11 @@ async function showHeart(){
   const w = window.innerWidth, h = window.innerHeight;
   const pts = heart(200);
   const pops = [];
-  
-  // 动态计算缩放比例，适配手机小屏幕
   const scale = Math.min(w / 500, h / 800) * 0.9;
   
   for(const p of pts){
-    // 动态调整爱心位置和大小
     const sx = w/2 + p.x * (16 * scale) - 55;
     const sy = h/2 - p.y * (16 * scale) - 40;
-    
     const d = document.createElement('div');
     d.className = 'pop';
     d.style.left = Math.max(0,Math.min(sx,w-110))+'px';
@@ -104,9 +82,7 @@ async function showHeart(){
 
 async function showFull(){
   const arr = [];
-  // 手机性能较弱，弹窗数量适当减少防卡顿
   const count = window.innerWidth < 768 ? 150 : 260;
-  
   for(let i=0;i<count;i++){
     arr.push(makeDiv('full'));
     await new Promise(r => setTimeout(r, 10));
@@ -116,16 +92,13 @@ async function showFull(){
 }
 
 async function start(){
-  if(started) return;
-  started = true;
-  document.getElementById('final').classList.remove('show');
   await showHeart();
   await showFull();
   document.getElementById('final').classList.add('show');
 }
 
-document.body.addEventListener('click', start);
-document.body.addEventListener('touchstart', start);
+// 页面加载后自动开始动画
+window.onload = start;
 </script>
 </body>
 </html>

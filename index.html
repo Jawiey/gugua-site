@@ -16,7 +16,6 @@
   }
   body { -webkit-tap-highlight-color: transparent; }
 
-  /* 全屏承载层 */
   #stage {
     position:fixed;
     top:0; left:0;
@@ -41,7 +40,6 @@
   }
   .full { border-radius:10px; animation:fade .2s ease-out; z-index:20; }
 
-  /* 结局全屏层 */
   .final {
     position:fixed;
     top:0; left:0;
@@ -61,25 +59,11 @@
   .line { font-size:32px; color:#fff; margin-top:15px; letter-spacing:4px; }
   .sub  { font-size:16px; color:#ff69b4; margin-top:10px; opacity:0.8; }
 
-  /* 顶部装饰文字 */
-  .top-text {
-    position:fixed;
-    top:20px; left:0; width:100%;
-    text-align:center;
-    color:#ff69b4;
-    font-size:22px;
-    z-index:50;
-    pointer-events:none;
-    text-shadow:0 2px 8px rgba(255,105,180,0.4);
-  }
-
   @keyframes beat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
   @keyframes fade { from{opacity:0; transform:scale(.5)} to{opacity:1; transform:scale(1)} }
 </style>
 </head>
 <body>
-
-<div class="top-text">可会变（谁没在变）<br><span style="font-size:14px;">ho wui bin (sui mua goi bin)</span></div>
 
 <div id="stage"></div>
 
@@ -98,15 +82,6 @@ let running = false;
 
 function rand(a,b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 
-// 读取安全区域（刘海屏 & 底部横条）
-function safeArea() {
-  const style = getComputedStyle(document.documentElement);
-  const top = parseFloat(style.getPropertyValue('--safe-area-inset-top')) || 0;
-  const bottom = parseFloat(style.getPropertyValue('--safe-area-inset-bottom')) || 0;
-  return { top, bottom };
-}
-
-// 获取真实可视尺寸（避开地址栏变化）
 function viewportSize() {
   if (window.visualViewport) {
     return { w: window.visualViewport.width, h: window.visualViewport.height };
@@ -114,7 +89,6 @@ function viewportSize() {
   return { w: window.innerWidth, h: window.innerHeight };
 }
 
-// 爱心参数方程（与原版一致）
 function heart(n) {
   const pts = [];
   for (let i = 0; i < n; i++) {
@@ -126,7 +100,6 @@ function heart(n) {
   return pts;
 }
 
-// 创建弹窗，返回 DOM 元素
 function makePop(cls, text, x, y, w, h) {
   const d = document.createElement('div');
   d.className = cls;
@@ -140,22 +113,19 @@ function makePop(cls, text, x, y, w, h) {
   return d;
 }
 
-// 爱心动画
 async function showHeart() {
   const { w, h } = viewportSize();
-  const safe = safeArea();
-  const usableH = h - safe.top - safe.bottom;
+  const safeTop = 0, safeBottom = 0;
+  const usableH = h - safeTop - safeBottom;
 
-  // 弹窗宽高随屏幕宽度等比变化
   const pw = Math.min(110, w * 0.26);
   const ph = Math.round(pw * 0.45);
 
-  // 爱心整体尺寸：占屏最小边的 75%
   const heartSize = Math.min(w, usableH) * 0.75;
-  const unit = heartSize / 32; // 爱心 x 范围约 32 个单位
+  const unit = heartSize / 32;
 
   const cx = w / 2;
-  const cy = safe.top + usableH / 2;
+  const cy = usableH / 2;
 
   const pts = heart(200);
   const pops = [];
@@ -165,45 +135,40 @@ async function showHeart() {
     const py = cy - p.y * unit - ph / 2;
     const d = makePop('pop', null, px, py, pw, ph);
     pops.push(d);
-    await new Promise(r => setTimeout(r, 25));
+    await new Promise(r => setTimeout(r, 60)); // 爱心生成速度，越大越慢
   }
 
   await new Promise(r => setTimeout(r, 3000));
   pops.forEach(p => p.remove());
 }
 
-// 满屏弹窗
 async function showFull() {
   const { w, h } = viewportSize();
-  const safe = safeArea();
   const usableW = w;
-  const usableH = h - safe.top - safe.bottom;
+  const usableH = h;
 
   const pw = Math.min(90, w * 0.22);
   const ph = Math.round(pw * 0.45);
 
-  const count = w < 600 ? 100 : 250; // 手机减少数量防卡
+  const count = w < 600 ? 100 : 250;
   const arr = [];
 
   for (let i = 0; i < count; i++) {
-    const px = safe.top + Math.random() * (usableW - pw); // 忽略 safe.left（竖屏不存在）
-    const py = safe.top + Math.random() * (usableH - ph);
+    const px = Math.random() * (usableW - pw);
+    const py = Math.random() * (usableH - ph);
     const d = makePop('full', null, px, py, pw, ph);
     arr.push(d);
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 25)); // 满屏弹窗生成速度
   }
 
   await new Promise(r => setTimeout(r, 5000));
   arr.forEach(p => p.remove());
 }
 
-// 主流程
 async function start() {
   if (running) return;
   running = true;
   finalLayer.classList.remove('show');
-
-  // 清空旧弹窗
   stage.innerHTML = '';
 
   await showHeart();
@@ -213,10 +178,7 @@ async function start() {
   running = false;
 }
 
-// 页面加载后自动开始，无需点击
 window.addEventListener('load', () => setTimeout(start, 600));
-
-// 结局层点击可重新看
 finalLayer.addEventListener('click', start);
 finalLayer.addEventListener('touchstart', start);
 </script>
